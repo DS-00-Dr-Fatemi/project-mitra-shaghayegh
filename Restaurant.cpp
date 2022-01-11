@@ -12,17 +12,20 @@ struct customer{
     ll eating_time;
 };
 
-void print_path(ll i_fnd,ll j_fnd,map<pair<ll,ll>,pair<ll,ll>> path){
+void print_path(ll i_fnd,ll j_fnd,map<pair<ll,ll>,pair<ll,ll>> path,ll initial_pos_i,ll initial_pos_j){
     ll i=i_fnd,j=j_fnd,prv;
     set<pair<ll,ll>> final_path;
+    // starting from the end to raech the initail position 
     while(1){
         final_path.insert({i,j});
         prv=i;
         i=path[{i,j}].first;
         j=path[{prv,j}].second;
-        if(i==kitchen_plc.first && j==kitchen_plc.second) break;
+        if(i==initial_pos_i && j==initial_pos_j) break;
     }
-    final_path.insert({kitchen_plc.first,kitchen_plc.second});
+    final_path.insert({initial_pos_i,initial_pos_j});
+    system("clear");
+    // printing the way colored
     for(ll i=0;i<length;i++){
         for(ll j=0;j<Rs_map[i].size();j++){
              if(final_path.find({i,j})!=final_path.end())    
@@ -37,15 +40,15 @@ void print_path(ll i_fnd,ll j_fnd,map<pair<ll,ll>,pair<ll,ll>> path){
     }
 }
 
-void find_shortest_path(char search){
+void find_shortest_path(char search,ll initial_pos_i,ll initial_pos_j){
     bool found=0;
     ll i_fnd,j_fnd;
     map<pair<ll,ll>,int> visited;
     map<pair<ll,ll>,pair<ll,ll>> path;
     queue<pair<ll,ll>> q;
-    visited[{kitchen_plc.first,kitchen_plc.second}]=1;
+    visited[{initial_pos_i,initial_pos_j}]=1;
     // applying bfs for shortest path
-    q.push({kitchen_plc.first,kitchen_plc.second});
+    q.push({initial_pos_i,initial_pos_j});
     while(!q.empty()){
         ll i=q.front().first,j=q.front().second;
         q.pop();
@@ -53,7 +56,7 @@ void find_shortest_path(char search){
         for(int k=-1;k<=1;k++){
             for(int w=-1;w<=1;w++){
                 if(i+k>=0 && j+w>=0 && i+k<Rs_map[i].size() && j+w<length){
-                if(visited[{i+k,j+w}]==0 && Rs_map[i+k][j+w]!='#'){
+                if(visited[{i+k,j+w}]==0 && (Rs_map[i+k][j+w]=='+' || Rs_map[i+k][j+w]==search)){
                     visited[{i+k,j+w}]=1;
                     path[{i+k,j+w}]={i,j};
                     q.push({i+k,j+w});
@@ -70,27 +73,31 @@ void find_shortest_path(char search){
         if(found) break;
     }
     if(!found) cout<<"CHE KHAKI BE SARAM KONAM GHAZAM YAKH KARD\n";
-    else  print_path(i_fnd,j_fnd,path);
+    else  print_path(i_fnd,j_fnd,path,initial_pos_i,initial_pos_j);
 }
 
 void deliverFood(){
        // getting the map
+       ll map_i,map_j;
+       cout<<"Enter map's dimentions : ";
+       cin>>map_i>>map_j;
        string input_str;
-        while (cin>>input_str){
+        for(ll k=0;k<map_j;k++){
+            cin>>input_str;
             Rs_map.push_back(input_str);
         if ( std::string::npos != input_str.find('$')){
             kitchen_plc.first=length;
             kitchen_plc.second=input_str.find('$');
         }
         length++;
-        if(length==10) break;
         }
-        find_shortest_path('b');
-    }
+        find_shortest_path('e',kitchen_plc.first,kitchen_plc.second);
+}
+
 int main(){
     string customer_detail;
-    deliverFood();
     // getting constome's data
+    deliverFood();
     vector<customer> costomer_info;
     cin.ignore();
     while(getline(cin,customer_detail)){
