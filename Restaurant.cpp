@@ -95,7 +95,7 @@ ll find_shortest_path(char search,ll initial_pos_i,ll initial_pos_j,bool print,l
 
 void deliverFood_from_kitchen(){
        ll i_fnd=kitchen_plc.first,j_fnd=kitchen_plc.second;
-       find_shortest_path('a',kitchen_plc.first,kitchen_plc.second,1,i_fnd,j_fnd);
+       find_shortest_path('b',kitchen_plc.first,kitchen_plc.second,1,i_fnd,j_fnd);
 }
 
 void get_restaurant_map(){
@@ -119,27 +119,35 @@ ll Tsp(){
     
 }
 
-void calMin_distn(){
+void calculate_Min_distn(){
     // calculating the minimum distance between each node exisited in this graph that should be traversed
     // Assuming our tables won't reach more than six (including kitchen)
-    // if the minimal diatnce from A to B is X , then the minimal distance from B to A is also X here
-    // 0->$ , 1->a, 2->b, 3->c , 4->e , 5->f , 6->g
+    // 0->$ , 1->a, 2->b, 3->c , 4->d , 5->e 
     vector<pair<ll,ll>>table_pos;
-    ll i_fnd=-1,j_fnd=-1;
+    ll i_fnd=kitchen_plc.first,j_fnd=kitchen_plc.second;
     char x='a';
     for(int i=1;i<6;i++,x++){
         distances[0][i]=find_shortest_path(x,kitchen_plc.first,kitchen_plc.second,0,i_fnd,j_fnd);
+        // if the minimal diatnce from A to B is X , then the minimal distance from B to A is also X here
+        distances[i][0]=distances[0][i];
         // pushing back each nodes position in the map
         table_pos.push_back({i_fnd,j_fnd});
     }
-    for(auto i:table_pos) cout<<i.first<<' '<<i.second<<endl;
+    for(int i=0;i<5;i++){
+        ll cur_i=table_pos[i].first,cur_j=table_pos[i].second;
+        x= Rs_map[cur_i][cur_j];
+        for(int j=i;j<5;j++,x++){
+            distances[i+1][j+1]=find_shortest_path(x,cur_i,cur_j,0,i_fnd,j_fnd);
+            distances[j+1][i+1]=distances[i+1][j+1];
+        }
+    }
 }
 
 int main(){
     string customer_detail;
     // getting constome's data
     get_restaurant_map();
-    calMin_distn();
+    calculate_Min_distn();
     vector<customer> costomer_info;
     cin.ignore();
     while(getline(cin,customer_detail)){
