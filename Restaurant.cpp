@@ -11,6 +11,8 @@ struct customer{
     ll prepartion_time;
     ll eating_time;
 };
+// Tsp part  & dynamic part Dp[2^n][n]
+ll distances[6][6],Dp[64][6],visited_all=(1<<6)-1;
 
 void print_path(ll i_fnd,ll j_fnd,map<pair<ll,ll>,pair<ll,ll>> path,ll initial_pos_i,ll initial_pos_j){
     ll i=i_fnd,j=j_fnd,prv;
@@ -23,7 +25,8 @@ void print_path(ll i_fnd,ll j_fnd,map<pair<ll,ll>,pair<ll,ll>> path,ll initial_p
         j=path[{prv,j}].second;
         if(i==initial_pos_i && j==initial_pos_j) break;
     }
-    final_path.insert({initial_pos_i,initial_pos_j});
+    // if the node we are searching for is not itself
+    if(i_fnd!=initial_pos_i &&j_fnd!=initial_pos_j) final_path.insert({initial_pos_i,initial_pos_j});
     system("clear");
     // printing the way colored
     for(ll i=0;i<length;i++){
@@ -40,15 +43,23 @@ void print_path(ll i_fnd,ll j_fnd,map<pair<ll,ll>,pair<ll,ll>> path,ll initial_p
     }
 }
 
-void find_shortest_path(char search,ll initial_pos_i,ll initial_pos_j){
+ll find_shortest_path(char search,ll initial_pos_i,ll initial_pos_j,bool print,ll &i_fnd,ll &j_fnd){
     bool found=0;
-    ll i_fnd,j_fnd;
-    map<pair<ll,ll>,int> visited;
+    ll final_depth;
+    map<pair<ll,ll>,ll> visited,depth;
     map<pair<ll,ll>,pair<ll,ll>> path;
     queue<pair<ll,ll>> q;
     visited[{initial_pos_i,initial_pos_j}]=1;
+    if(Rs_map[initial_pos_i][initial_pos_j]==search) {
+        // if the node we are searching for is itself 
+        path[{initial_pos_i,initial_pos_j}]={initial_pos_i,initial_pos_j};
+        if(print) print_path(initial_pos_i,initial_pos_j,path,initial_pos_i,initial_pos_j);
+        return 0;
+    }
     // applying bfs for shortest path
     q.push({initial_pos_i,initial_pos_j});
+    // calculating the depth for each path for two nodes
+    depth[{initial_pos_i,initial_pos_j}]=0;
     while(!q.empty()){
         ll i=q.front().first,j=q.front().second;
         q.pop();
@@ -59,10 +70,12 @@ void find_shortest_path(char search,ll initial_pos_i,ll initial_pos_j){
                 if(visited[{i+k,j+w}]==0 && (Rs_map[i+k][j+w]=='+' || Rs_map[i+k][j+w]==search)){
                     visited[{i+k,j+w}]=1;
                     path[{i+k,j+w}]={i,j};
+                    depth[{i+k,j+w}]=depth[{i,j}]+1;
                     q.push({i+k,j+w});
                     if(Rs_map[i+k][j+w]==search){
                         i_fnd=i+k,j_fnd=j+w;
                         found=1;
+                        final_depth=depth[{i+k,j+w}];
                         break;
                     }
                   }
@@ -72,14 +85,23 @@ void find_shortest_path(char search,ll initial_pos_i,ll initial_pos_j){
         }
         if(found) break;
     }
-    if(!found) cout<<"CHE KHAKI BE SARAM KONAM GHAZAM YAKH KARD\n";
-    else  print_path(i_fnd,j_fnd,path,initial_pos_i,initial_pos_j);
+    if(!found) {
+       if(print) cout<<"CHE KHAKI BE SARAM KONAM GHAZAM YAKH KARD\n";
+        final_depth=-1;
+    }
+    else if(print) print_path(i_fnd,j_fnd,path,initial_pos_i,initial_pos_j);
+    return final_depth-1;
 }
 
-void deliverFood(){
-       // getting the map
-       ll map_i,map_j;
-       cout<<"Enter map's dimentions : ";
+void deliverFood_from_kitchen(){
+       ll i_fnd=kitchen_plc.first,j_fnd=kitchen_plc.second;
+       cout<<find_shortest_path('b',kitchen_plc.first,kitchen_plc.second,1,i_fnd,j_fnd)<<endl;;
+}
+
+void get_restaurant_map(){
+      // getting the map
+    ll map_i,map_j;
+     cout<<"Enter map's dimentions : ";
        cin>>map_i>>map_j;
        string input_str;
         for(ll k=0;k<map_j;k++){
@@ -91,13 +113,67 @@ void deliverFood(){
         }
         length++;
         }
-        find_shortest_path('e',kitchen_plc.first,kitchen_plc.second);
+}
+
+void calculate_Min_distn(){
+    // calculating the minimum distance between each node exisited in this graph that should be traversed
+    // Assuming our tables won't reach more than six (including kitchen)
+    // 0->$ , 1->a, 2->b, 3->c , 4->d , 5->e 
+    vector<pair<ll,ll>>table_pos;
+    ll i_fnd=kitchen_plc.first,j_fnd=kitchen_plc.second;
+    char x='a';
+    for(int i=1;i<6;i++,x++){
+        distances[0][i]=find_shortest_path(x,kitchen_plc.first,kitchen_plc.second,false,i_fnd,j_fnd);
+        // if the minimal diatnce from A to B is X , then the minimal distance from B to A is also X here
+        distances[i][0]=distances[0][i];
+        // pushing back each nodes position in the map
+        table_pos.push_back({i_fnd,j_fnd});
+    }
+    for(int i=0;i<5;i++){
+        ll cur_i=table_pos[i].first,cur_j=table_pos[i].second;
+        x= Rs_map[cur_i][cur_j];
+        for(int j=i;j<5;j++,x++){
+            distances[i+1][j+1]=find_shortest_path(x,cur_i,cur_j,false,i_fnd,j_fnd);
+            distances[j+1][i+1]=distances[i+1][j+1];
+        }
+    }
+}
+
+ll Tsp(ll mark,ll position){
+    if(mark==visited_all) 
+        return distances[position][0];
+
+    if(Dp[mark][position]!=-1)
+        return Dp[mark][position];
+    
+    ll ans=__INT64_MAX__;
+
+    for(int table=0;table<6;table++){
+        if((mark&(1<<table))==0){
+            ll newAns = distances[position][table] + Tsp( mark|(1<<table),table);
+            ans = min(ans,newAns);
+        }
+    }
+  return Dp[mark][position]=ans;
+}
+
+void shortest_distn_btwn_allNodes(){
+    // initialize the Dp array 
+     for(int i=0;i<(1<<6);i++){
+        for(int j=0;j<6;j++){
+            Dp[i][j] = -1;
+        }
+    }
+    calculate_Min_distn();
+    cout<<Tsp(1,0)<<endl;
 }
 
 int main(){
     string customer_detail;
     // getting constome's data
-    deliverFood();
+     get_restaurant_map();
+     shortest_distn_btwn_allNodes();
+    //deliverFood_from_kitchen();
     vector<customer> costomer_info;
     cin.ignore();
     while(getline(cin,customer_detail)){
