@@ -167,6 +167,158 @@ void shortest_distn_btwn_allNodes(){
     calculate_Min_distn();
     cout<<Tsp(1,0)<<endl;
 }
+/*Kitchen part functions*/
+class Food {
+public:
+    //Finished food class
+    string name;
+    ll TimePrepare;
+    map<string, ll> Nodes;
+    map<string, vector<string>> adj;
+    map<string, ll>indeg;
+    map<string, ll>visited;
+    //vector to save topological sort
+    vector<string> SortedNodes;
+    Food(string n)
+    {
+        name = n;
+        TimePrepare = 0;
+    }
+    void TopologicalSort(const string& node)
+    {
+        visited[node] = 1;
+        for (auto i : adj[node])
+        {
+            if (!visited[i])
+                TopologicalSort(i);
+        }
+        SortedNodes.push_back(node);
+    }
+    void PrintSortedNodes()
+    {
+        for (auto i : visited)
+            visited[i.first] = 0;
+        for (auto i : adj)
+        {
+            if (!visited[i.first])
+            {
+                TopologicalSort(i.first);
+            }
+        }
+        reverse(SortedNodes.begin(), SortedNodes.end());
+        cout << "Topo Sort : ";
+        for (auto i : SortedNodes)
+            cout << i << ' ';
+        cout << endl;
+    }
+    void GetPrereq()
+    {
+        //Get and find relation between prerequisites by using adjacency map
+        string Relations;
+        /*cin.ignore();*/
+        while (getline(cin, Relations))
+        {
+            if (Relations == "end")
+                return;
+            if (Relations != "End of instructions")
+            {
+                vector<string> NodeRel;
+                istringstream isspre(Relations);
+                for (string s; isspre >> s; )
+                    NodeRel.push_back(s);
+                string DepenNode = NodeRel[0];
+                for (ll i = 1; i < NodeRel.size(); i += 2)
+                {
+                    adj[NodeRel[i]].push_back(DepenNode);
+                    indeg[DepenNode]++;
+                    Nodes[DepenNode] += stoi(NodeRel[i + 1]) + Nodes[NodeRel[i]];
+                }
+            }
+            else break;
+        }
+        PrintSortedNodes();
+        TimePrepare = Nodes[name];
+    }
+    bool ThereIsPath(string u, string v)
+    {
+        if (u == v)
+            return true;
+        for (auto i : visited)
+            visited[i.first] = 0;
+        queue<string> q;
+        visited[u] = true;
+        q.push(u);
+        while (!q.empty())
+        {
+            u = q.front();
+            q.pop();
+            for (auto i : adj[u])
+            {
+                if (i == v)
+                    return true;
+                if (!visited[i])
+                {
+                    visited[i] = true;
+                    q.push(i);
+                }
+            }
+        }
+        return false;
+    }
+    void AddRelation(string rel)
+    {
+        vector<string> newRel;
+        istringstream isspre(rel);
+        for (string s; isspre >> s; )
+            newRel.push_back(s);
+        string NewDepenNode = newRel[0];
+        string PrereqNode = newRel[1];
+        if (!ThereIsPath(NewDepenNode, PrereqNode))
+        {
+            adj[PrereqNode].push_back(NewDepenNode);
+            indeg[NewDepenNode]++;
+            Nodes[NewDepenNode] += stoi(newRel[2]) + Nodes[PrereqNode];
+            SortedNodes.clear();
+            PrintSortedNodes();
+        }
+        else
+        {
+            cout << "Chef will be crashed!!" << endl;
+        }
+    }
+};
+void DeleteFood(string deletefood, unordered_map<string, Food*>& foods)
+{
+    //Delete the food
+    try
+    {
+        foods.erase(deletefood);
+    }
+    catch (const std::exception&)
+    {
+        cout << "Unable to delete the food";
+    }
+}
+void hasMaxPrereq(unordered_map<string, Food*>& foods)
+{
+    //find the food which has the maximum prerequisites
+    ll MaxPrereq = 0;
+    string MaxPrereqFood;
+    for (auto i : foods)
+    {
+        //iterate in map to find the maximum prerequisites
+        if (i.second->indeg[i.first] > MaxPrereq)
+        {
+            MaxPrereq = i.second->indeg[i.first];
+            MaxPrereqFood = i.first;
+        }
+    }
+    cout << "Max Prereq : " << MaxPrereqFood << endl;
+}
+void MaxMinTimePrepareFood(map<ll, Food*>& FoodTimePrepare)
+{
+    cout << "Min: " << FoodTimePrepare.begin()->second->name << " Max: " << FoodTimePrepare.rbegin()->second->name << endl;
+}
 /* Party part functions*/
 class Node
 {
@@ -509,6 +661,29 @@ void Party()
         {
             AVL.ShowTree();
         }
+    }
+}
+void Kitchen()
+{
+    //using unordered map to have access to finished foods and their names
+    unordered_map<string, Food*> Foods;
+    //using map to to have access to finished foods and their time prepare
+    map<ll, Food*> SortedFoodTimePrepare;
+    string str;
+    /*cin.ignore();*/
+    while (getline(cin, str))
+    {
+        //create a new food and insert to unordered map and map
+        if (str == "New Food:")
+        {
+            string NewFoodName;
+            getline(cin, NewFoodName);
+            Food* newfood = new Food(NewFoodName);
+            newfood->GetPrereq();
+            Foods.insert({ NewFoodName,newfood });
+            SortedFoodTimePrepare.insert({ newfood->TimePrepare, newfood });
+        }
+        else break;
     }
 }
 int main(){
