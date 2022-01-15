@@ -1,11 +1,11 @@
 /* this project is written by Mitra Omrani & Shaghayegh Shahbazi */
 // this project is for restaurant administraition for following matarials 
 /*
- 1. store customer's data 
- 2. store foods and their requirments 
- 3. get service and find the shortes path to deliver the food
- 4. find the shortest path among all the tables
- 5. asign turns to each customer that enters & take their service by their priority 
+ 1. storing customer's data 
+ 2. storing foods and their requirments 
+ 3. geting service and finding the shortes path to deliver the food
+ 4. finding the shortest path among all the tables
+ 5. asigning turns to each customer that enters & taking their services by their priority 
  */
 #include<bits/stdc++.h>
 #include <stdlib.h>
@@ -38,7 +38,7 @@ struct customer{
     ll prepartion_time;
     ll eating_time;
 };
-void delivery_menu();
+void main_menu();
 /* Delivery part functions */
 // Tsp part  & dynamic part Dp[2^n][n]
 ll distances[6][6],Dp[64][6],visited_all=(1<<6)-1;
@@ -235,7 +235,7 @@ ll distances[6][6],Dp[64][6],visited_all=(1<<6)-1;
             /*cin.ignore();*/
             while (getline(cin, Relations))
             {
-                if (Relations == "end")
+                if (Relations == "end" || Relations=="END")
                     return;
                 if (Relations != "End of instructions")
                 {
@@ -253,6 +253,7 @@ ll distances[6][6],Dp[64][6],visited_all=(1<<6)-1;
                 }
                 else break;
             }
+            system("clear");
             PrintSortedNodes();
             TimePrepare = Nodes[name];
         }
@@ -306,13 +307,17 @@ ll distances[6][6],Dp[64][6],visited_all=(1<<6)-1;
             }
         }
     };
+//using unordered map to have access to finished foods and their names
+    unordered_map<string, Food*> Foods;
+//using map  to have access to finished foods and their time prepare
+    map<ll, Food*> SortedFoodTimePrepare;
 
-    void DeleteFood(string deletefood, unordered_map<string, Food*>& foods)
+    void DeleteFood(string deletefood)
     {
         //Delete the food
         try
         {
-            foods.erase(deletefood);
+            Foods.erase(deletefood);
         }
         catch (const std::exception&)
         {
@@ -320,12 +325,12 @@ ll distances[6][6],Dp[64][6],visited_all=(1<<6)-1;
         }
     }
 
-    void hasMaxPrereq(unordered_map<string, Food*>& foods)
+    void hasMaxPrereq()
     {
         //find the food which has the maximum prerequisites
         ll MaxPrereq = 0;
         string MaxPrereqFood;
-        for (auto i : foods)
+        for (auto i : Foods)
         {
             //iterate in map to find the maximum prerequisites
             if (i.second->indeg[i.first] > MaxPrereq)
@@ -334,12 +339,12 @@ ll distances[6][6],Dp[64][6],visited_all=(1<<6)-1;
                 MaxPrereqFood = i.first;
             }
         }
-        cout << "Max Prereq : " << MaxPrereqFood << endl;
+        cout << BOLDYELLOW <<"Max Prereq : " <<BOLDRED << MaxPrereqFood <<RESET<< endl;
     }
 
-    void MaxMinTimePrepareFood(map<ll, Food*>& FoodTimePrepare)
+    void MaxMinTimePrepareFood()
     {
-        cout << "Min: " << FoodTimePrepare.begin()->second->name << " Max: " << FoodTimePrepare.rbegin()->second->name << endl;
+        cout << "Min: " << SortedFoodTimePrepare.begin()->second->name << " Max: " << SortedFoodTimePrepare.rbegin()->second->name << endl;
     }
 
 /* Party part functions*/
@@ -706,10 +711,6 @@ public:
 
     void Kitchen_inputs()
     {
-        //using unordered map to have access to finished foods and their names
-        unordered_map<string, Food*> Foods;
-        //using map to to have access to finished foods and their time prepare
-        map<ll, Food*> SortedFoodTimePrepare;
         string str;
         /*cin.ignore();*/
         while (getline(cin, str))
@@ -781,6 +782,179 @@ public:
         }
     }
 
+    void delivery_menu(){
+            system("clear");
+            ll tmp,i_fnd,j_fnd;
+            char table_name,test;
+            printf(RED "Choose the one you desire to do:\n" RESET);
+            printf(RED "1. " RESET);
+            printf(CYAN "Enter map's Restaurant \n" RESET);
+            printf(RED "2. " RESET);
+            printf(CYAN "Find the shortest path from kitchen to chosen table \n" RESET);
+            printf(RED "3. " RESET);
+            printf(CYAN "Find the length of the shortest path crossing all nodes(tables) \n" RESET);
+            printf(RED "4. " RESET);
+            printf(CYAN "Find shortest path between two nodes \n" RESET);
+            printf(RED "5. " RESET);
+            printf(CYAN "Back to main menu \n" RESET);
+            cin>>tmp;
+            system("clear");
+                switch (tmp)
+                {
+                case 1:
+                    get_restaurant_map();
+                    std::this_thread::sleep_for(std::chrono::seconds(2)); 
+                    return delivery_menu();
+                    break;
+
+                case 2:
+                    if(Rs_map.size()==0){
+                        printf(RED " You need to enter restaurant's map first ! \n");
+                        std::this_thread::sleep_for(std::chrono::seconds(2)); 
+                        return delivery_menu();
+                    }
+                    printf(YELLOW "Enter your desired table char representation : " RESET);
+                    cin>>table_name;
+                    find_shortest_path(table_name,kitchen_plc.first,kitchen_plc.second,1,i_fnd,j_fnd);
+                    printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                    cin>>test;
+                    if(test=='q' || test=='Q') return delivery_menu();
+                    break;
+
+                case 3:
+                    if(Rs_map.size()==0){
+                        printf(RED " You need to enter restaurant's map first ! \n");
+                        std::this_thread::sleep_for(std::chrono::seconds(2)); 
+                        return delivery_menu();
+                    }
+                    shortest_distn_btwn_allNodes();
+                    printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                        cin>>test;
+                        if(test=='q' || test=='Q') return delivery_menu();
+                    break;
+
+                case 4:
+                    if(Rs_map.size()==0){
+                        printf(RED " You need to enter restaurant's map first ! \n");
+                        std::this_thread::sleep_for(std::chrono::seconds(2)); 
+                        return delivery_menu();
+                    }
+                    printf(CYAN "Eneter the first node's char representation : " RESET);
+                    cin>>test;
+                    find_shortest_path(test,kitchen_plc.first,kitchen_plc.second,0,i_fnd,j_fnd);
+                    printf(CYAN "Eneter the second node's char representation : " RESET);
+                    cin>>test;
+                    find_shortest_path(test,i_fnd,j_fnd,1,i_fnd,j_fnd);
+                    printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                        cin>>test;
+                        if(test=='q' || test=='Q') return delivery_menu();
+                    break;
+                
+                case 5:
+                    return ;
+                    break;
+                default:
+                    printf(RED "OUT OF RANGE ! \n" RESET);
+                    std::this_thread::sleep_for(std::chrono::seconds(2)); 
+                    delivery_menu();
+                    break;
+                }
+        }
+
+    void kitchen_menu(){
+        ll x;
+        system("clear");
+        printf(YELLOW "Choose the one you desire to do:\n" RESET);
+        printf(RED "1. " RESET);
+        printf(CYAN "Enter a Food and its requirments and Print Topological sort representation based on food requirments\n" RESET);
+        printf(RED "2. " RESET);
+        printf(CYAN "Add a prerequisity to a specific food  \n" RESET);
+        printf(RED "3. " RESET);
+        printf(CYAN "Delete a food\n" RESET);
+        printf(RED "4. " RESET);
+        printf(CYAN "The food that has the greatest number of prerequisites\n" RESET);
+        printf(RED "5. " RESET);
+        printf(CYAN "The food that takes most and least time to prepare\n" RESET);
+        printf(RED "6. " RESET);
+        printf(CYAN "back to main menu \n" RESET);
+        cin>>x;
+        char test;
+        string food_del,Food_add_rel;;
+        switch (x)
+        {
+            case 1:
+                printf(CYAN "=> to enter a food first type " BOLDRED "( New Food : ) \n" CYAN "=> Then enter its requirments, when you are done type : " BOLDRED "end\n" RESET);
+                Kitchen_inputs();
+                printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                        cin>>test;
+                        if(test=='q' || test=='Q') return kitchen_menu();
+                break;
+
+            case 2:
+                printf(CYAN " Enter name of the food you desire to add a relation to : \n" RESET);
+                getline(cin,Food_add_rel);
+                if(Foods.find(Food_add_rel)!=Foods.end()){
+                    printf(GREEN "=> Enter your relation\n" RESET);
+                    cin.ignore();
+                    getline(cin,Food_add_rel);
+                    Foods[Food_add_rel]->AddRelation(Food_add_rel);
+                    std::this_thread::sleep_for(std::chrono::seconds(2));
+                    return kitchen_menu();
+                }
+                else{
+                    system("clear");
+                    printf(RED " The food doesn't exist , first you need to add it !\n" RESET);
+                    std::this_thread::sleep_for(std::chrono::seconds(2)); 
+                    return kitchen_menu();
+                }
+                break;
+            
+            case 3:
+                printf(CYAN "Enter the name of the food that you want to delete : "\RESET);
+                cin.ignore();
+                getline(cin,food_del);
+                if(Foods.find(food_del)!=Foods.end()){
+                    DeleteFood(food_del);
+                    std::this_thread::sleep_for(std::chrono::seconds(2)); 
+                    return kitchen_menu();
+                }
+                else{
+                    system("clear");
+                    printf(RED "This food doesn't exists ! \n" RESET);
+                    std::this_thread::sleep_for(std::chrono::seconds(2)); 
+                    return kitchen_menu();
+                }
+                break;
+            
+            case 4:
+                hasMaxPrereq();
+                printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                        cin>>test;
+                        if(test=='q' || test=='Q') return kitchen_menu();
+                break;
+            
+            case 5 :
+                if(SortedFoodTimePrepare.size()==0){
+                    system("clear");
+                    printf(RED "You don't have any food in your list at the moment \n" RESET);
+                    std::this_thread::sleep_for(std::chrono::seconds(2)); 
+                    return kitchen_menu();
+                }
+                MaxMinTimePrepareFood();
+                printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                        cin>>test;
+                        if(test=='q' || test=='Q') return kitchen_menu();
+                break;
+            
+            case 6:
+                return main_menu();
+                break;
+            
+            default:
+                break;
+            }
+    }
+
     void main_menu(){
         ll x,tmp;
         system ("clear");
@@ -810,79 +984,14 @@ public:
         delivery_menu();
         return main_menu();
             break;
+        case 3 :
+        kitchen_menu();
+        return main_menu();
+            break;
+
         default:
             break;
         }
-    }
-
-    void delivery_menu(){
-        system("clear");
-        ll tmp,i_fnd,j_fnd;
-        char table_name,test;
-        printf(CYAN "Choose the one you desire to do:\n" RESET);
-        printf (GREEN " 1. Enter map's Restaurant  \n 2. Find the shortest path from kitchen to chosen table \n 3. Find the length of the shortest path crossing all nodes(tables)\n 4. Find shortest path between two nodes \n 5. Back to main menu \n" RESET);
-        cin>>tmp;
-        system("clear");
-            switch (tmp)
-            {
-            case 1:
-                get_restaurant_map();
-                std::this_thread::sleep_for(std::chrono::seconds(2)); 
-                return delivery_menu();
-                break;
-
-            case 2:
-                if(Rs_map.size()==0){
-                    printf(RED " You need to enter restaurant's map first ! \n");
-                    std::this_thread::sleep_for(std::chrono::seconds(2)); 
-                    return delivery_menu();
-                }
-                printf(YELLOW "Enter your desired table char representation : " RESET);
-                cin>>table_name;
-                find_shortest_path(table_name,kitchen_plc.first,kitchen_plc.second,1,i_fnd,j_fnd);
-                printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
-                cin>>test;
-                if(test=='q' || test=='Q') return delivery_menu();
-                break;
-
-            case 3:
-                if(Rs_map.size()==0){
-                    printf(RED " You need to enter restaurant's map first ! \n");
-                    std::this_thread::sleep_for(std::chrono::seconds(2)); 
-                    return delivery_menu();
-                }
-                shortest_distn_btwn_allNodes();
-                 printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
-                    cin>>test;
-                    if(test=='q' || test=='Q') return delivery_menu();
-                break;
-
-            case 4:
-                  if(Rs_map.size()==0){
-                    printf(RED " You need to enter restaurant's map first ! \n");
-                    std::this_thread::sleep_for(std::chrono::seconds(2)); 
-                    return delivery_menu();
-                }
-                printf(CYAN "Eneter the first node's char representation : " RESET);
-                cin>>test;
-                find_shortest_path(test,kitchen_plc.first,kitchen_plc.second,0,i_fnd,j_fnd);
-                printf(CYAN "Eneter the second node's char representation : " RESET);
-                cin>>test;
-                find_shortest_path(test,i_fnd,j_fnd,1,i_fnd,j_fnd);
-                printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
-                    cin>>test;
-                    if(test=='q' || test=='Q') return delivery_menu();
-                break;
-            
-            case 5:
-                return ;
-                break;
-            default:
-                printf(RED "OUT OF RANGE ! \n" RESET);
-                std::this_thread::sleep_for(std::chrono::seconds(2)); 
-                delivery_menu();
-                break;
-            }
     }
 
 int main(){
