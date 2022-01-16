@@ -30,8 +30,8 @@ using ll=long long;
 #define BOLDCYAN    "\033[1m\033[36m"
 vector<string> Rs_map;
 pair<ll,ll>kitchen_plc;
-int length=0;
-
+ll length=0;
+bool ok=0;
 struct customer{
     string name;
     string ordered_food;
@@ -548,7 +548,8 @@ public:
                 if (root->Turn == TurntoSearch)
                 {
                     cout << root->name << endl;
-                    return true;
+                    ok=1;
+                    return ok;
                 }
                 else if (root->Turn < TurntoSearch)
                 {
@@ -560,7 +561,7 @@ public:
                 }
             }
             //node not found
-            return false;
+            return ok;
         }
 
         void ShowTree()
@@ -788,8 +789,10 @@ public:
 
     void party_menu(){
         ll x,turn;
-        string name,TurnOrName;
+        string name,TurnOrName,turn2;
+        char test;
         system("clear");
+        printf(BOLDMAGENTA "---------------- Party ----------------\n" RESET);
         printf(YELLOW "Choose the one you desire to do :\n" RESET);
         printf(RED "1. " RESET);
         printf(CYAN "Insert\n" RESET);
@@ -807,9 +810,9 @@ public:
         switch (x)
         {
             case 1:
-                printf(CYAN " Enter the name of the person you want to add : " RESET);
+                printf(BLUE " Enter the name of the person you want to add : " RESET);
                 cin>>name;
-                printf(CYAN " Enter the turn of the person you already entered their name : " RESET);
+                printf(BLUE " Enter the turn of the person you already entered their name : " RESET);
                 cin>>turn;
                 AVL.root = AVL.insert(AVL.root, turn, name);
                 return party_menu();
@@ -824,18 +827,38 @@ public:
                     }
                     else
                         AVL.root = AVL.deleteNodeByName(TurnOrName);
+                   // std::this_thread::sleep_for(std::chrono::seconds(0.85));
+                    return party_menu();
                 break;
 
             case 3:
-                printf(CYAN "Enter the turn of the person in order to search them : " RESET);
-                cin >> turn;
-                    if (!AVL.searchByTurn(AVL.root, turn))
-                        printf(BOLDRED "Not Found!\n" RESET); 
-                    else printf(BOLDGREEN "Found !\n" RESET);
+                    printf(CYAN "Enter the turn of the person in order to search them : " RESET);
+                    cin >> turn2;
+                    system("clear");
+                    if(isNumber(turn2)) turn=stoi(turn2);
+                    else {
+                          printf(RED " Unable to search ,remmember to enter the " BOLDRED" TURN " RED " not the name \n" RESET);
+                    std::this_thread::sleep_for(std::chrono::seconds(3)); 
+                    return  party_menu();
+                    }
+                    ok=0;
+                        if (!AVL.searchByTurn(AVL.root, turn))
+                            printf(BOLDRED "Not Found!\n\n" RESET); 
+                        else printf(BOLDGREEN "Found !\n\n" RESET);
+                    ok=0;
+                    printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                            cin>>test;
+                            if(test=='q' || test=='Q') return party_menu();
                 break;
 
             case 4:
+            system("clear");
+            printf(BOLDMAGENTA "---------------- Show ----------------\n\n" RESET);
             AVL.ShowTree();
+            cout<<"\n\n";
+              printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                        cin>>test;
+                        if(test=='q' || test=='Q') return party_menu();
                 break;
 
             case 5:
@@ -843,10 +866,13 @@ public:
                 break;
 
             case 6:
-                return main_menu();
+                return;
                 break;
 
             default:
+             printf(RED "OUT OF RANGE ! \n" RESET);
+                    std::this_thread::sleep_for(std::chrono::seconds(2)); 
+                 return  party_menu();
                 break;
             }
     }
@@ -855,6 +881,7 @@ public:
             system("clear");
             ll tmp,i_fnd,j_fnd;
             char table_name,test;
+            printf(BOLDMAGENTA "---------------- Delivery ----------------\n" RESET);
             printf(YELLOW "Choose the one you desire to do:\n" RESET);
             printf(RED "1. " RESET);
             printf(CYAN "Enter map's Restaurant \n" RESET);
@@ -908,10 +935,10 @@ public:
                         std::this_thread::sleep_for(std::chrono::seconds(2)); 
                         return delivery_menu();
                     }
-                    printf(CYAN "Eneter the first node's char representation : " RESET);
+                    printf(BLUE "Eneter the first node's char representation : " RESET);
                     cin>>test;
                     find_shortest_path(test,kitchen_plc.first,kitchen_plc.second,0,i_fnd,j_fnd);
-                    printf(CYAN "Eneter the second node's char representation : " RESET);
+                    printf(BLUE "Eneter the second node's char representation : " RESET);
                     cin>>test;
                     find_shortest_path(test,i_fnd,j_fnd,1,i_fnd,j_fnd);
                     printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
@@ -923,9 +950,9 @@ public:
                     return ;
                     break;
                 default:
-                    printf(RED "OUT OF RANGE ! \n" RESET);
+                    printf(RED "OUT OF RANGE OF LIST NUMBERS ! \n" RESET);
                     std::this_thread::sleep_for(std::chrono::seconds(2)); 
-                    delivery_menu();
+                    return delivery_menu();
                     break;
                 }
         }
@@ -933,6 +960,7 @@ public:
     void kitchen_menu(){
         ll x;
         system("clear");
+        printf(BOLDMAGENTA "---------------- Kitchen ----------------\n" RESET);
         printf(YELLOW "Choose the one you desire to do:\n" RESET);
         printf(RED "1. " RESET);
         printf(CYAN "Enter a Food and its requirments and Print Topological sort representation based on food requirments\n" RESET);
@@ -952,7 +980,7 @@ public:
         switch (x)
         {
             case 1:
-                printf(CYAN "=> to enter a food first type " BOLDRED "( New Food : ) \n" CYAN "=> Then enter its requirments, when you are done type : " BOLDRED "end\n" RESET);
+                printf(BLUE "=> to enter a food first type " BOLDRED "( New Food : ) \n" BLUE "=> Then enter its requirments, when you are done type : " BOLDRED "end\n" RESET);
                 Kitchen_inputs();
                 printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
                         cin>>test;
@@ -960,7 +988,7 @@ public:
                 break;
 
             case 2:
-                printf(CYAN " Enter name of the food you desire to add a relation to : \n" RESET);
+                printf(GREEN " Enter name of the food you desire to add a relation to : \n" RESET);
                 getline(cin,Food_add_rel);
                 if(Foods.find(Food_add_rel)!=Foods.end()){
                     printf(GREEN "=> Enter your relation\n" RESET);
@@ -979,7 +1007,7 @@ public:
                 break;
             
             case 3:
-                printf(CYAN "Enter the name of the food that you want to delete : " RESET);
+                printf(BLUE "Enter the name of the food that you wish to delete : " RESET);
                 cin.ignore();
                 getline(cin,food_del);
                 if(Foods.find(food_del)!=Foods.end()){
@@ -1020,6 +1048,9 @@ public:
                 break;
             
             default:
+             printf(RED "OUT OF RANGE OF LIST NUMBERS ! \n" RESET);
+                    std::this_thread::sleep_for(std::chrono::seconds(2)); 
+                return   kitchen_menu();
                 break;
             }
     }
@@ -1037,6 +1068,8 @@ public:
         printf(CYAN "Kitchen \n" RESET);
         printf(RED "4. " RESET);
         printf(CYAN "Party\n" RESET);
+        printf(RED "5. " RESET);
+        printf(CYAN "End the program\n" RESET);
         cin>>x;
         system("clear");
         switch (x)
@@ -1065,7 +1098,13 @@ public:
         return main_menu();
             break;
 
+        case 5:
+        return;
+            break;
         default:
+         printf(RED "OUT OF RANGE OF LIST NUMBERS ! \n" RESET);
+                    std::this_thread::sleep_for(std::chrono::seconds(2)); 
+            return   main_menu();
             break;
         }
     }
@@ -1078,7 +1117,7 @@ int main(){
     printf("| |__| | |  __|  | |     | |     | | | | | | V| | |  __|  \n");
     printf("|  ^^  | | |___  | |____ | |__|| | |_| | | |  | | | |___  \n");
     printf(" V    V  |_____| |_____/ | ____| |_____| |_|  |_| | ____| \n" RESET);
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::this_thread::sleep_for(std::chrono::seconds(4));
     main_menu();
     return 0;
 }
