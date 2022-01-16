@@ -9,6 +9,7 @@
  */
 #include<bits/stdc++.h>
 #include <stdlib.h>
+#include <cstdlib>
 #include <thread>
 #include <chrono>
 using namespace std;
@@ -339,7 +340,10 @@ ll distances[6][6],Dp[64][6],visited_all=(1<<6)-1;
                 MaxPrereqFood = i.first;
             }
         }
-        cout << BOLDYELLOW <<"Max Prereq : " <<BOLDRED << MaxPrereqFood <<RESET<< endl;
+        if(MaxPrereq==0){
+            cout << BOLDYELLOW <<"You don't have a Max ! "<< endl;
+        }
+        else cout << BOLDYELLOW <<"Max Prereq : " <<BOLDRED << MaxPrereqFood <<RESET<< endl;
     }
 
     void MaxMinTimePrepareFood()
@@ -715,7 +719,7 @@ public:
     void Kitchen_inputs()
     {
         string str;
-        /*cin.ignore();*/
+        cin.ignore();
         while (getline(cin, str))
         {
             //create a new food and insert to unordered map and map
@@ -846,7 +850,7 @@ public:
                             printf(BOLDRED "Not Found!\n\n" RESET); 
                         else printf(BOLDGREEN "Found !\n\n" RESET);
                     ok=0;
-                    printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                    printf(GREEN "\nTo turn back to menu Enter" BOLDYELLOW " q\n" RESET);
                             cin>>test;
                             if(test=='q' || test=='Q') return party_menu();
                 break;
@@ -856,7 +860,7 @@ public:
             printf(BOLDMAGENTA "---------------- Show ----------------\n\n" RESET);
             AVL.ShowTree();
             cout<<"\n\n";
-              printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+              printf(GREEN "\nTo turn back to menu Enter" BOLDYELLOW " q\n" RESET);
                         cin>>test;
                         if(test=='q' || test=='Q') return party_menu();
                 break;
@@ -912,7 +916,7 @@ public:
                     printf(YELLOW "Enter your desired table char representation : " RESET);
                     cin>>table_name;
                     find_shortest_path(table_name,kitchen_plc.first,kitchen_plc.second,1,i_fnd,j_fnd);
-                    printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                    printf(GREEN "\nTo turn back to menu Enter" BOLDYELLOW " q\n" RESET);
                     cin>>test;
                     if(test=='q' || test=='Q') return delivery_menu();
                     break;
@@ -924,7 +928,7 @@ public:
                         return delivery_menu();
                     }
                     shortest_distn_btwn_allNodes();
-                    printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                    printf(GREEN "\nTo turn back to menu Enter" BOLDYELLOW " q\n" RESET);
                         cin>>test;
                         if(test=='q' || test=='Q') return delivery_menu();
                     break;
@@ -941,7 +945,7 @@ public:
                     printf(BLUE "Eneter the second node's char representation : " RESET);
                     cin>>test;
                     find_shortest_path(test,i_fnd,j_fnd,1,i_fnd,j_fnd);
-                    printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                    printf(GREEN "\nTo turn back to menu Enter" BOLDYELLOW " q\n" RESET);
                         cin>>test;
                         if(test=='q' || test=='Q') return delivery_menu();
                     break;
@@ -976,7 +980,7 @@ public:
         printf(CYAN "back to main menu \n" RESET);
         cin>>x;
         char test;
-        string food_del,Food_add_rel;;
+        string food_del,Food_add_rel,name;
         switch (x)
         {
             case 1:
@@ -989,12 +993,12 @@ public:
 
             case 2:
                 printf(GREEN " Enter name of the food you desire to add a relation to : \n" RESET);
-                getline(cin,Food_add_rel);
-                if(Foods.find(Food_add_rel)!=Foods.end()){
+                cin.ignore();
+                getline(cin,name);
+                if(Foods.find(name)!=Foods.end()){
                     printf(GREEN "=> Enter your relation\n" RESET);
-                    cin.ignore();
                     getline(cin,Food_add_rel);
-                    Foods[Food_add_rel]->AddRelation(Food_add_rel);
+                    Foods[name]->AddRelation(Food_add_rel);
                     std::this_thread::sleep_for(std::chrono::seconds(2));
                     return kitchen_menu();
                 }
@@ -1025,7 +1029,7 @@ public:
             
             case 4:
                 hasMaxPrereq();
-                printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                printf(GREEN "\nTo turn back to menu Enter" BOLDYELLOW " q\n" RESET);
                         cin>>test;
                         if(test=='q' || test=='Q') return kitchen_menu();
                 break;
@@ -1038,13 +1042,13 @@ public:
                     return kitchen_menu();
                 }
                 MaxMinTimePrepareFood();
-                printf(GREEN "To turn back to menu Enter" BOLDYELLOW " q\n" RESET);
+                printf(GREEN "\nTo turn back to menu Enter" BOLDYELLOW " q\n" RESET);
                         cin>>test;
                         if(test=='q' || test=='Q') return kitchen_menu();
                 break;
             
             case 6:
-                return main_menu();
+                return;
                 break;
             
             default:
@@ -1099,12 +1103,13 @@ public:
             break;
 
         case 5:
-        return;
+        return ;
             break;
+        
         default:
          printf(RED "OUT OF RANGE OF LIST NUMBERS ! \n" RESET);
                     std::this_thread::sleep_for(std::chrono::seconds(2)); 
-            return   main_menu();
+            return  main_menu();
             break;
         }
     }
